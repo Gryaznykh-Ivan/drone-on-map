@@ -2,19 +2,22 @@ import pygame
 
 from classes.Drone import Drone
 from classes.MiniMap import MiniMap
+from classes.Settings import SettingsPanel
 
 class Engine:
     def __init__(self):
-        self.screen = pygame.display.set_mode((1200, 800))
+        self.screen = pygame.display.set_mode((1400, 800))
         self.clock = pygame.time.Clock()
         self.map = pygame.image.load("assets/map.jpg")
-        self.drone = Drone(0, 0, 8)
+        self.drone = Drone(self.screen.get_width() // 2, self.screen.get_height() // 2, 8)
         self.offset = (0, 0)
         self.saved_mouse_pos = (0, 0)
+        self.follow_drone = True
 
         pygame.display.set_caption("Карта")
 
     def run(self):
+        settings_panel = SettingsPanel(self.screen, self)
         mini_map = MiniMap(self.drone, self.map, self.screen)
 
         while True:
@@ -24,12 +27,21 @@ class Engine:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
+                
+                settings_panel.handle_event(event)
+
+            self.drone.movement(self.map)
 
             self.mouse()
-            self.drone.movement(self.map)
-            self.drone.draw(self.screen, self.offset)
 
+            if self.follow_drone == True:
+                self.offset = (self.screen.get_width() // 2 - self.drone.x, self.screen.get_height() // 2 - self.drone.y)
+                self.offset = (min(0, max(-self.map.get_width() + self.screen.get_width(), self.offset[0])),
+                               min(0, max(-self.map.get_height() + self.screen.get_height(), self.offset[1])))
+
+            self.drone.draw(self.screen, self.offset)
             mini_map.draw()
+            settings_panel.draw()
 
             pygame.display.update()
 
