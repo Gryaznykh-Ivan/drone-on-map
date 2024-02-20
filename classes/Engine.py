@@ -1,6 +1,7 @@
 import pygame
 
 from classes.Drone import Drone
+from classes.MiniMap import MiniMap
 
 class Engine:
     def __init__(self):
@@ -14,6 +15,8 @@ class Engine:
         pygame.display.set_caption("Карта")
 
     def run(self):
+        mini_map = MiniMap(self.drone, self.map, self.screen)
+
         while True:
             self.clock.tick(30)
             self.screen.blit(self.map, self.offset)
@@ -25,6 +28,8 @@ class Engine:
             self.mouse()
             self.drone.movement(self.map)
             self.drone.draw(self.screen, self.offset)
+
+            mini_map.draw()
 
             pygame.display.update()
 
